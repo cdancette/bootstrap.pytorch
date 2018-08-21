@@ -162,8 +162,8 @@ class SimpleModel(DefaultModel):
 
     def forward(self, batch):
         batch = self.prepare_batch(batch)
-        net_out = self.network(batch['data'])
-
+        net_out = self.network(batch)
+        
         cri_out = {}
         if self.mode in self.criterions:
             cri_tmp = self.criterions[self.mode](net_out, batch)

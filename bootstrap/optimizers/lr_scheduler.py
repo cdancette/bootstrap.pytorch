@@ -1,4 +1,4 @@
-import torch.optim.lr_scheduler
+import torch.optim.lr_scheduler as lr_scheduler
 from bootstrap.lib.logger import Logger
 
 class LearningRateScheduler():
@@ -6,7 +6,7 @@ class LearningRateScheduler():
     def __init__(self, optimizer, name='StepLR', step_size=1, gamma=1):
         self.optimizer = optimizer
         self.param_groups = self.optimizer.param_groups # to keep compatibility with GradClipper
-        self.scheduler = torch.optim.lr_scheduler.__dict__[name](
+        self.scheduler = lr_scheduler.__dict__[name](
             optimizer,
             step_size,
             gamma=gamma)

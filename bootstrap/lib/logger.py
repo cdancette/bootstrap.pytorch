@@ -14,6 +14,7 @@ import json
 import inspect
 import datetime
 import collections
+from tensorboardX import SummaryWriter
 
 # Logger is a singleton
 # https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
@@ -73,6 +74,8 @@ class Logger(object):
                 Logger._instance.reload_json()
             else:
                 Logger._instance.log_message('No logs files will be created (dir_logs attribut is empty)', log_level=Logger.WARNING)
+
+            self.writer = SummaryWriter(log_dir=dir_logs)
 
         return Logger._instance
 
@@ -138,8 +141,12 @@ class Logger(object):
     def log_value(self, name, value, stack_displacement=2, should_print=False, log_level=SUMMARY):
         if name not in self.values:
             self.values[name] = []
+        
+        if 'loss' in name or 'accuracy' in name or 'precision' in name or 'recall' in name or 'f1_score' in name:
+            phase, attribute = name.split('.')[0], name.split('.')[-1]
+            self.writer.add_scalar('%s/%s' % (phase, attribute), value, len(self.values[name]))
+        
         self.values[name].append(value)
-
         if should_print:
             if type(value) == float:
                 if int(value) == 0:
@@ -149,8 +156,7 @@ class Logger(object):
             else:
                 message = '{}: {}'.format(name, value)
             self.log_message(message, log_level=log_level, stack_displacement=stack_displacement+1, )
-
-
+        
     def log_dict(self, group, dictionary, description='', stack_displacement=2, should_print=False, log_level=SUMMARY):
         if group not in self.perf_memory:
             self.perf_memory[group] = {}

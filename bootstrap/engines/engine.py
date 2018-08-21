@@ -118,11 +118,11 @@ class Engine():
             self.hook('train_on_forward')
 
             out['loss'].backward()
-            #torch.cuda.synchronize()
+            torch.cuda.synchronize()
             self.hook('train_on_backward')
 
             optimizer.step()
-            #torch.cuda.synchronize()
+            torch.cuda.synchronize()
             self.hook('train_on_update')
 
             timer['process'] = time.time() - timer['elapsed']
@@ -248,7 +248,7 @@ class Engine():
             try:
                 out[key] = sum(value)/len(value)
             except:
-                import ipdb; ipdb.set_trace()
+                pass
 
         Logger().log_value('eval_epoch.epoch', epoch, should_print=True)
         for key, value in out.items():
