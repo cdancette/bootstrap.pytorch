@@ -202,6 +202,8 @@ class Engine(object):
                     continue
                 if type(value) == dict:
                     continue
+                if value is None:
+                    continue
                 if key not in out_epoch:
                     out_epoch[key] = []
                 out_epoch[key].append(value)
@@ -292,6 +294,8 @@ class Engine(object):
                 if type(value) == list:
                     continue
                 if type(value) == dict:
+                    continue
+                if value is None:
                     continue
                 if key not in out_epoch:
                     out_epoch[key] = []
