@@ -34,4 +34,5 @@ def factory(engine=None):
     if Options()['misc']['cuda']:
         model.cuda()
 
+    Logger()(f'Model created, of type {type(model)}...')
     return model

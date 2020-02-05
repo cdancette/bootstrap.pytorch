@@ -30,5 +30,7 @@ def factory(engine=None, mode=None):
 
     else:
         raise ValueError()
+    
+    Logger()(f'Criterion created, of type {type(criterion)}...')
 
     return criterion

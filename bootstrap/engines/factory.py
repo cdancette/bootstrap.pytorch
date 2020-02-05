@@ -21,4 +21,5 @@ def factory():
     else:
         raise ValueError
 
+    Logger()(f'Engine created, of class {type(engine)}')
     return engine

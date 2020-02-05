@@ -24,6 +24,8 @@ def factory(model, engine=None):
         if 'grad_clip' in Options()['optimizer']:
             optimizer = factory_grad_clip(optimizer)
 
+    Logger()(f'Optimizer created, of type {type(optimizer)}...')
+
     return optimizer
 
 

@@ -1,7 +1,7 @@
 import collections
 import torch
 from torch.autograd import Variable
-
+import traceback
 
 class Compose(object):
     """Composes several collate together.
@@ -114,6 +114,8 @@ class StackTensors(object):
             try:
                 return torch.stack(batch, 0, out=out)
             except:
+                print(f"Failed stacking tensor with key {key}")
+                traceback.print_exc()
                 import ipdb; ipdb.set_trace()
         else:
             return batch

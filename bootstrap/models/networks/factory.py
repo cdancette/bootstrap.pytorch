@@ -14,4 +14,6 @@ def factory(engine=None):
     else:
         raise ValueError()
 
+    Logger()(f'Network created, of type {type(network)}...')
+
     return network
