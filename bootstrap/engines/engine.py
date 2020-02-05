@@ -391,9 +391,17 @@ class Engine(object):
         """
         path_template = os.path.join(dir_logs, 'ckpt_{}_{}.pth.tar')
 
+
         Logger()('Loading model...')
-        model_state = torch.load(path_template.format(name, 'model'), map_location=map_location)
-        model.load_state_dict(model_state)
+        if os.path.isfile(path_template.format(name, 'model')):
+            model_state = torch.load(path_template.format(name, 'model'), map_location=map_location)
+            model.load_state_dict(model_state)
+        else:
+            if Options()['exp'].get('resume_or_start', False):
+                Logger()("No checkpoint. Starting from scratch", log_level=Logger.WARNING)
+                return
+            else:
+                raise RuntimeError(f"No checkpoint at {path_template.format(name, 'model')}")
 
         if Options()['dataset']['train_split'] is not None:
             if os.path.isfile(path_template.format(name, 'optimizer')):
