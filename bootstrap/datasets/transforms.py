@@ -30,10 +30,26 @@ class ListDictsToDictLists(object):
 
     def ld_to_dl(self, batch):
         if isinstance(batch[0], collections.Mapping):
-            return {key: self.ld_to_dl([d[key] for d in batch]) for key in batch[0]}
+            return {key: [d[key] for d in batch] for key in batch[0]}
         else:
             return batch
 
+
+class ListTupleToTupleList(object):
+
+    def __init__(self):
+        pass
+
+    def __call__(self, batch):
+        batch = self.lt_to_tl(batch)
+        return batch
+
+    def lt_to_tl(self, batch):
+        if  isinstance(batch, list) or isinstance(batch, tuple):
+            if isinstance(batch[0], tuple):
+                n = len(batch[0])
+                return tuple([elt[k] for elt in batch] for k in range(n))
+        return batch
 
 class PadTensors(object):
 
@@ -103,6 +119,8 @@ class StackTensors(object):
                 else:
                     out[key] = value
             return out
+        elif isinstance(batch, tuple):
+            return tuple(self.stack_tensors(elt) for elt in batch)
         elif isinstance(batch, collections.Sequence) and torch.is_tensor(batch[0]):
             out = None
             if self.use_shared_memory:
@@ -183,6 +201,8 @@ class ToCuda(object):
             # TODO: Really hacky
             return Variable(batch.data.cuda(non_blocking=True))
         elif isinstance(batch, collections.Sequence) and torch.is_tensor(batch[0]):
+            return [self.to_cuda(value) for value in batch]
+        elif isinstance(batch, list):
             return [self.to_cuda(value) for value in batch]
         else:
             return batch
