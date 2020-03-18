@@ -13,9 +13,9 @@ def train_func(config):
     print("*****************" + os.getcwd())
     option_path = config.pop("option_file")
 
-    os.chdir("/home/dancette/doc/rubi.bootstrap.pytorch")
+    os.chdir(config.pop('run_dir'))
 
-    command = ["python", "-m", "bootstrap.run",
+    command = ["python", "-u", "-m", "bootstrap.run",
         "-o", option_path,
         "--exp.resume", "last",
         "--exp.resume_or_start", "true",  # TODO : réfléchir à ce qu'on veut vraiment avoir ici..
@@ -26,8 +26,20 @@ def train_func(config):
     arguments = []
     for name, value in config.items():
         arguments.append(f"--{name}")
-        arguments.append(str(value))
-        exp_dir += f"--{name.split('.')[-1]}_{value}"
+        print(value)
+        print(type(value))
+        if type(value) == list:
+            for x in value:
+                arguments.append(str(x))
+        else:
+            arguments.append(str(value))
+
+        if type(value) == list:
+            value_str = ",".join(str(x) for x in value)
+        else:
+            value_str = str(value)
+        
+        exp_dir += f"--{name.split('.')[-1]}_{value_str}"
     
     command += ["--exp.dir", exp_dir]
     command += arguments
@@ -49,14 +61,16 @@ def train_func(config):
 def build_tune_config(option_path):
     with open(option_path, 'r') as yaml_file:
         options = yaml.load(yaml_file)
-
     config = {}
     for item in options['gridsearch']['params']:
-        key = item["name"]
-        config[key] = tune.grid_search(item["values"])
+        key = item['name']
+        print("*************** VALUES", item['values'])
+        config[key] = tune.grid_search(item['values'])
+    print(config)
 
-    config["exp_dir_prefix"] = os.path.join(os.getcwd(), options["exp"]["dir"])
-    config["option_file"] = os.path.join(os.getcwd(), option_path)
+    config["exp_dir_prefix"] = options["exp"]["dir"]
+    config["option_file"] = option_path
+    config['run_dir'] = os.getcwd()
     return config, options["gridsearch"]["name"]
 
 def main():
