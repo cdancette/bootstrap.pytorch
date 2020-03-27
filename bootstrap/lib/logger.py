@@ -14,6 +14,8 @@ import json
 import inspect
 import datetime
 import collections
+import traceback
+import torch
 
 # https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
 class Logger(object):
@@ -152,6 +154,8 @@ class Logger(object):
     def log_value(self, name, value, stack_displacement=2, should_print=False, log_level=SUMMARY):
         """
         """
+        if type(value) == torch.Tensor:
+            value = value.item()
         if name not in self.values:
             self.values[name] = []
         self.values[name].append(value)
@@ -228,4 +232,5 @@ class Logger(object):
                     os.system('rm '+self.path_json)
                 os.system('mv {} {}'.format(self.path_tmp, self.path_json))
             except Exception as e:
-                print(e)
+                breakpoint()
+                traceback.print_exc()
