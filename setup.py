@@ -124,6 +124,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         'torch',
+        'torchvision',
         'numpy',
         'argparse',
         'pyyaml',
@@ -132,6 +133,7 @@ setup(
         'click',
         'ipdb',
         'tabulate',
+        'tqdm',
         'tensorboardX'
     ],
 
