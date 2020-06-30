@@ -132,8 +132,8 @@ class StackTensors(object):
             try:
                 return torch.stack(batch, 0, out=out)
             except:
-                print(f"Failed stacking tensor with key {key}")
                 traceback.print_exc()
+                Logger()(f"Failed stacking tensor with key {key}", log_level=Logger.ERROR)
                 import ipdb; ipdb.set_trace()
         else:
             return batch
