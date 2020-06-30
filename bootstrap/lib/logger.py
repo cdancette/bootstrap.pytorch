@@ -94,6 +94,8 @@ class Logger(object):
     def __call__(self, *args, **kwargs):
         return self.log_message(*args, **kwargs, stack_displacement=2)
 
+    def warn(self, *args, **kwargs):
+        return self.log_message(*args, **kwargs,  stack_displacement=2, log_level=self.WARNING)
 
     def set_level(self, log_level):
         self.log_level = log_level
