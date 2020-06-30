@@ -227,8 +227,12 @@ class Engine(object):
 
         Logger().log_value(f'{mode}_epoch.epoch', epoch, should_print=True)
         for key, value in out_epoch.items():
-            Logger().log_value(f'{mode}_epoch.'+key, sum(value)/len(value), should_print=True)
-        
+            try:
+                Logger().log_value(f'{mode}_epoch.'+key, sum(value)/len(value), should_print=True)
+            except:
+                Logger()(f"Error with key {key} and value {value}", log_level=Logger.ERROR)
+                raise
+
         self.hook(f'{mode}_on_end_epoch')
         Logger().flush()
         self.hook(f'{mode}_on_flush')
@@ -271,6 +275,8 @@ class Engine(object):
 
             with torch.no_grad():
                 out = model(batch)
+                if 'loss' in out and torch.isnan(out['loss']):
+                    Logger()('NaN detected in eval loss')
             #torch.cuda.synchronize()
             self.hook('{}_on_forward'.format(mode))
 
