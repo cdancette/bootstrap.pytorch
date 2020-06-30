@@ -84,11 +84,12 @@ class Engine(object):
         """ Resume a checkpoint using the `bootstrap.lib.options.Options`
         """
         Logger()('Loading {} checkpoint'.format(Options()['exp']['resume']))
-        self.load(Options()['exp']['dir'],
+        loaded = self.load(Options()['exp']['dir'],
                   Options()['exp']['resume'],
                   self.model, self.optimizer,
                   map_location=map_location)
-        self.epoch += 1
+        if loaded:
+            self.epoch += 1
 
     def eval(self):
         """ Launch evaluation procedures
@@ -397,32 +398,37 @@ class Engine(object):
         """
         path_template = os.path.join(dir_logs, 'ckpt_{}_{}.pth.tar')
 
-
-        Logger()('Loading model...')
-        if os.path.isfile(path_template.format(name, 'model')):
-            model_state = torch.load(path_template.format(name, 'model'), map_location=map_location)
-            model.load_state_dict(model_state)
-        else:
+        if not os.path.isfile(path_template.format(name, 'model')):
             if Options()['exp'].get('resume_or_start', False):
                 Logger()("No checkpoint. Starting from scratch", log_level=Logger.WARNING)
-                return
+                return False
             else:
                 raise RuntimeError(f"No checkpoint at {path_template.format(name, 'model')}")
+        
+        if Options()['dataset']['train_split'] is not None:
+            if not os.path.isfile(path_template.format(name, 'optimizer')):
+                Logger()('No optimizer checkpoint', log_level=Logger.WARNING)
+                return False
+
+        if not os.path.isfile(path_template.format(name, 'engine')):
+            Logger()('No engine checkpoint', log_level=Logger.WARNING)
+            return False
+
+
+        Logger()('Loading model...')
+        model_state = torch.load(path_template.format(name, 'model'), map_location=map_location)
+        model.load_state_dict(model_state)
 
         if Options()['dataset']['train_split'] is not None:
-            if os.path.isfile(path_template.format(name, 'optimizer')):
-                Logger()('Loading optimizer...')
-                optimizer_state = torch.load(path_template.format(name, 'optimizer'), map_location=map_location)
-                optimizer.load_state_dict(optimizer_state)
-            else:
-                Logger()('No optimizer checkpoint', log_level=Logger.WARNING)
+            Logger()('Loading optimizer...')
+            optimizer_state = torch.load(path_template.format(name, 'optimizer'), map_location=map_location)
+            optimizer.load_state_dict(optimizer_state)
 
-        if os.path.isfile(path_template.format(name, 'engine')):
             Logger()('Loading engine...')
             engine_state = torch.load(path_template.format(name, 'engine'), map_location=map_location)
             self.load_state_dict(engine_state)
-        else:
-            Logger()('No engine checkpoint', log_level=Logger.WARNING)
+
+        return True
 
     def save(self, dir_logs, name, model, optimizer):
         """ Save a checkpoint
