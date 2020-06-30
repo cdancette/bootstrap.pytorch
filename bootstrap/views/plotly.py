@@ -123,7 +123,8 @@ class Plotly():
                     x = x,
                     y = y,
                     name = view['view_interim'],
-                    line = dict(color=color)
+                    line = dict(color=color),
+                    hoverlabel=dict(namelength = -1),
                 )
                 figure.append_trace(scatter, figure_pos_y, figure_pos_x)
 
