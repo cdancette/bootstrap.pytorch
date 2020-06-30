@@ -50,7 +50,8 @@ def init_logs_options_files(exp_dir, resume=None):
     Logger(exp_dir, name=logs_name)
 
 
-def run(path_opts=None):
+
+def run(path_opts=None, train_engine=True, eval_engine=True):
     # first call to Options() load the options yaml file from --path_opts command line argument if path_opts=None
     Options(path_opts)
     # initialiaze seeds to be able to reproduce experiment on reload
@@ -93,15 +94,16 @@ def run(path_opts=None):
 
     # if no training split, evaluate the model on the evaluation split
     # (example: $ python main.py --dataset.train_split --dataset.eval_split test)
-    if not Options()['dataset']['train_split']:
+    if eval_engine and not Options()['dataset']['train_split']:
         engine.eval()
 
     # optimize the model on the training split for several epochs
     # (example: $ python main.py --dataset.train_split train)
     # if evaluation split, evaluate the model after each epochs
     # (example: $ python main.py --dataset.train_split train --dataset.eval_split val)
-    if Options()['dataset']['train_split']:
+    if train_engine and Options()['dataset']['train_split']:
         engine.train()
+    return engine
 
 
 def main(path_opts=None, run=None):
