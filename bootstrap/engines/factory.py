@@ -17,7 +17,6 @@ def factory():
 
     elif Options()['engine']['name'] == 'logger':
         engine = LoggerEngine()
-
     else:
         raise ValueError
 

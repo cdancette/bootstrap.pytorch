@@ -2,6 +2,7 @@ import collections
 import torch
 from torch.autograd import Variable
 import traceback
+from bootstrap.lib.logger import Logger
 
 class Compose(object):
     """Composes several collate together.

@@ -144,6 +144,9 @@ class DefaultModel(Model):
         """
         return net_factory(engine)
 
+    def set_mode(self, mode):
+        self.mode = mode
+
     def _init_criterions(self, engine=None):
         """ Create the two criterions using the bootstrap criterion factory
         """

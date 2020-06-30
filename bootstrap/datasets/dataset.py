@@ -2,6 +2,46 @@ import torch.utils.data as data
 import itertools
 from . import transforms as bootstrap_tf
 
+class BootstrapDataset(data.Dataset):
+    def __init__(self, dataset, batch_size, shuffle, pin_memory, nb_threads, sampler=None):
+        self.dataset = dataset
+
+        self.split = dataset.split
+     
+        self.batch_size = batch_size
+        self.shuffle = shuffle
+        self.pin_memory = pin_memory
+        self.nb_threads = nb_threads
+        self.sampler = sampler
+
+        if not hasattr(dataset, 'collate_fn'):
+            self.collate_fn = bootstrap_tf.Compose([
+                bootstrap_tf.ListDictsToDictLists(),
+                bootstrap_tf.ListTupleToTupleList(),
+                bootstrap_tf.StackTensors()
+            ])
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, index):
+        return self.dataset[index]
+    
+    def __getattr__(self, attr):
+        return getattr(self.dataset, attr)
+
+    def make_batch_loader(self, batch_size=None, shuffle=None):
+        batch_loader = data.DataLoader(
+            dataset=self,
+            batch_size=self.batch_size if batch_size is None else batch_size,
+            shuffle=self.shuffle if shuffle is None else shuffle,
+            pin_memory=self.pin_memory,
+            num_workers=self.nb_threads,
+            collate_fn=self.collate_fn,
+            sampler=None)
+        return batch_loader
+
+
 
 class Dataset(data.Dataset):
 
@@ -22,6 +62,7 @@ class Dataset(data.Dataset):
 
         self.collate_fn = bootstrap_tf.Compose([
             bootstrap_tf.ListDictsToDictLists(),
+            bootstrap_tf.ListTupleToTupleList(),
             bootstrap_tf.StackTensors()
         ])
 
